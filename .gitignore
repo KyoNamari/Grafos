@@ -1,0 +1,53 @@
+# --- EMBARCADERO C++ BUILDER ---
+
+# Archivos compilados y objetos (BASURA PESADA)
+*.obj
+*.o
+*.tds
+*.csm
+*.map
+*.pdi
+*.dcu
+*.dcp
+*.rsm
+
+# Ejecutables y Librerías generadas (No se suben al repo)
+*.exe
+*.dll
+*.bpl
+*.lib
+*.a
+*.so
+*.dylib
+
+# Archivos temporales y de respaldo de Embarcadero
+*.~*
+*.ilc
+*.ild
+*.ilf
+*.ils
+*.dpl
+*.bpi
+
+# Configuraciones locales de usuario (Son solo para tu PC)
+*.local
+*.ident
+*.tvsconfig
+
+# Carpetas generadas automáticamente (Historial y Compilación)
+__history/
+__recovery/
+Debug/
+Release/
+Win32/
+Win64/
+Android/
+iOSDevice64/
+
+# --- VISUAL STUDIO CODE ---
+.vscode/
+
+# --- SISTEMA OPERATIVO ---
+Thumbs.db
+Desktop.ini
+.DS_Store
