@@ -1,167 +1,333 @@
 #include <iostream>
 #include <vector>
-#include <windows.h>
 #include <queue>
 #include <stack>
+#include <windows.h>
 
 using namespace std;
 
-// ------------------- INSERTAR PARA NO PONDERADO -------------------
-void insertar(int o, int d, vector<vector<int>>& g, bool dirigido) {
+// =======================================================
+//       INSERTAR ARISTAS
+// =======================================================
+
+void insertarNP(int o, int d, vector<vector<int>>& g, bool dirigido) {
     g[o].push_back(d);
     if (!dirigido)
         g[d].push_back(o);
 }
 
-// ------------------- INSERTAR PARA PONDERADO ----------------------
-void insertarGP(int o, int d, int p, vector<vector<pair<int,int>>>& g, bool dirigido) {
+void insertarP(int o, int d, int p, vector<vector<pair<int,int>>>& g, bool dirigido) {
     g[o].push_back({d, p});
     if (!dirigido)
         g[d].push_back({o, p});
 }
 
-// ------------------- BFS NO PONDERADO -----------------------------
-void bfs(int start, vector<bool>& v, vector<vector<int>>& g) {
+// =======================================================
+//       BFS para componentes y conectividad
+// =======================================================
+
+void bfs_component(int start, vector<bool>& visited, vector<vector<int>>& g) {
     queue<int> q;
+    visited[start] = true;
     q.push(start);
-    v[start] = true;
 
     cout << "Componente: ";
+
     while (!q.empty()) {
         int u = q.front(); q.pop();
         cout << u << " ";
 
-        for (int i : g[u]) {
-            if (!v[i]) {
-                v[i] = true;
-                q.push(i);
+        for (int v : g[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
             }
         }
     }
     cout << "\n";
 }
 
-// ------------------- DFS NO PONDERADO -----------------------------
-void dfs(int start, vector<bool>& v, vector<vector<int>>& g) {
-    stack<int> st;
-    st.push(start);
-    v[start] = true;
+// =======================================================
+//       DFS (para componentes y conectividad)
+// =======================================================
 
-    cout << "Componente: ";
-    while (!st.empty()) {
-        int u = st.top(); st.pop();
-        cout << u << " ";
+void dfs_rec(int u, vector<bool>& visited, vector<vector<int>>& g) {
+    visited[u] = true;
+    for (int v : g[u])
+        if (!visited[v])
+            dfs_rec(v, visited, g);
+}
 
-        for (int i : g[u]) {
-            if (!v[i]) {
-                v[i] = true;
-                st.push(i);
+// =======================================================
+//       VERIFICAR SI ES BIPARTITO
+// =======================================================
+
+bool esBipartito(vector<vector<int>>& g, int n) {
+    vector<int> color(n, -1);
+
+    for (int i = 0; i < n; i++) {
+        if (color[i] != -1) continue;
+
+        queue<int> q;
+        q.push(i);
+        color[i] = 0;
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+
+            for (int v : g[u]) {
+                if (color[v] == -1) {
+                    color[v] = 1 - color[u];
+                    q.push(v);
+                }
+                else if (color[v] == color[u]) {
+                    return false;
+                }
             }
         }
     }
-    cout << "\n";
+    return true;
 }
 
-// ======================= MAIN PROGRAM =============================
+// =======================================================
+//       FUERTEMENTE CONEXO (VERSIÓN SIMPLE)
+// =======================================================
+
+bool fuertementeConexo(vector<vector<int>>& g, int n) {
+    vector<bool> visited(n, false);
+
+    dfs_rec(0, visited, g);
+    for (bool x : visited) if (!x) return false;
+
+    vector<vector<int>> trans(n);
+    for (int u = 0; u < n; u++)
+        for (int v : g[u])
+            trans[v].push_back(u);
+
+    fill(visited.begin(), visited.end(), false);
+
+    dfs_rec(0, visited, trans);
+    for (bool x : visited) if (!x) return false;
+
+    return true;
+}
+
+// =======================================================
+//       VERIFICAR SI ES ÁRBOL (versión optimizada)
+// =======================================================
+
+bool esArbol(vector<vector<int>>& g, int n, int aristas) {
+    vector<bool> visited(n, false);
+
+    bfs_component(0, visited, g);
+
+    for (bool x : visited)
+        if (!x) return false;
+
+    if (aristas != n - 1) return false;
+
+    return true;
+}
+
+// =======================================================
+//                       MAIN
+// =======================================================
+
 int main() {
+    int op, n = 0, a = 0;
+    bool dirigido = false, ponderado = false;
 
-    int op, n, a, ori, des, peso;
-    bool dirigido, ponderado;
+    vector<vector<int>> grafoNP;
+    vector<vector<pair<int,int>>> grafoP;
 
     do {
         system("cls");
-        cout << "_________________________________________________\n";
-        cout << "      L A B O R A T O R Y  O F  G R A F O S      \n";
-        cout << "_________________________________________________\n";
-
+        cout << "____________________________\n";
+        cout << "     LABORATORY OF GRAPHS   \n";
+        cout << "____________________________\n";
         cout << "1. Almacenar Grafo\n";
         cout << "2. Caracteristicas\n";
-        cout << "3. Camino mas corto\n";
-        cout << "4. Expansion\n";
-        cout << "5. Matching\n";
         cout << "0. Salir\n";
         cin >> op;
 
-        // --------------------- ALMACENAR GRAFO ---------------------
-        if (op == 1) {
-            system("cls");
+        switch(op) {
 
-            // Selección dirigido / no dirigido
-            cout << "Seleccione el tipo:\n";
+        // ===========================================================
+        //                  OPCION 1: ALMACENAR GRAFO
+        // ===========================================================
+        case 1: {
+            system("cls");
+            int t;
+
             cout << "1. Grafo dirigido\n";
             cout << "2. Grafo no dirigido\n";
-            cin >> op;
-            dirigido = (op == 1);
+            cin >> t;
+            dirigido = (t == 1);
 
-            // Selección ponderado / no ponderado
-            cout << "\nSeleccione si es ponderado:\n";
-            cout << "1. Ponderado\n";
-            cout << "2. No Ponderado\n";
-            cin >> op;
-            ponderado = (op == 1);
+            cout << "\n1. Ponderado\n";
+            cout << "2. No ponderado\n";
+            cin >> t;
+            ponderado = (t == 1);
 
-            cout << "\nIngrese la cantidad de nodos: ";
+            cout << "\nCantidad de nodos: ";
             cin >> n;
-
-            cout << "Ingrese la cantidad de aristas: ";
+            cout << "Cantidad de aristas: ";
             cin >> a;
 
-            if (!ponderado) {
-                // ----------- GRAFO NO PONDERADO ----------------
-                vector<vector<int>> grafo(n);
-                vector<bool> visited(n, false);
+            grafoNP.assign(n, {});
+            grafoP.assign(n, {});
 
+            if (!ponderado) {
                 for (int i = 0; i < a; i++) {
+                    int u, v;
                     cout << "Origen Destino: ";
-                    cin >> ori >> des;
-                    insertar(ori, des, grafo, dirigido);
+                    cin >> u >> v;
+                    insertarNP(u, v, grafoNP, dirigido);
                 }
 
                 cout << "\nGrafo almacenado:\n";
                 for (int i = 0; i < n; i++) {
                     cout << i << " -> ";
-                    for (auto x : grafo[i])
-                        cout << x << " ";
+                    for (auto v : grafoNP[i]) cout << v << " ";
                     cout << "\n";
                 }
-
-                cout << "\nComponentes BFS:\n";
-                fill(visited.begin(), visited.end(), false);
-                for (int i = 0; i < n; i++)
-                    if (!visited[i]) bfs(i, visited, grafo);
-
-                cout << "\nComponentes DFS:\n";
-                fill(visited.begin(), visited.end(), false);
-                for (int i = 0; i < n; i++)
-                    if (!visited[i]) dfs(i, visited, grafo);
             }
             else {
-                // ----------- GRAFO PONDERADO -------------------
-                vector<vector<pair<int,int>>> grafo(n);
-
                 for (int i = 0; i < a; i++) {
+                    int u, v, p;
                     cout << "Origen Destino Peso: ";
-                    cin >> ori >> des >> peso;
-                    insertarGP(ori, des, peso, grafo, dirigido);
+                    cin >> u >> v >> p;
+                    insertarP(u, v, p, grafoP, dirigido);
+                    insertarNP(u, v, grafoNP, dirigido);
                 }
 
                 cout << "\nGrafo ponderado almacenado:\n";
                 for (int i = 0; i < n; i++) {
                     cout << i << " -> ";
-                    for (auto &x : grafo[i])
-                        cout << "(" << x.first << ", peso=" << x.second << ") ";
+                    for (auto& par : grafoP[i])
+                        cout << "(" << par.first << ", peso=" << par.second << ") ";
                     cout << "\n";
                 }
-
-                cout << "\n(BFS y DFS no aplican directamente a ponderados)\n";
             }
 
             system("pause");
+            break;
         }
+
+        // ===========================================================
+        //                OPCION 2: CARACTERISTICAS
+        // ===========================================================
+        case 2: {
+            if (n == 0) {
+                cout << "No hay grafo cargado.\n";
+                system("pause");
+                break;
+            }
+
+            system("cls");
+
+            // ------------------ Lista de adyacencia -----------------
+            cout << "\nLISTA DE ADYACENCIA\n";
+            for (int i = 0; i < n; i++) {
+                cout << i << " -> ";
+                for (int v : grafoNP[i]) cout << v << " ";
+                cout << "\n";
+            }
+
+            // ------------------ Matriz de adyacencia ----------------
+            cout << "\nMATRIZ DE ADYACENCIA\n";
+			vector<vector<int>> matA(n, vector<int>(n, 0));
+			
+			if (!ponderado) {
+			    // --- No ponderado: solo marcamos 1 ---
+			    for (int u = 0; u < n; u++)
+			        for (int v : grafoNP[u])
+			            matA[u][v] = 1;
+			}
+			else {
+			    // --- Ponderado: usamos pesos reales ---
+			    for (int u = 0; u < n; u++)
+			        for (auto& par : grafoP[u]) {
+			            int v = par.first;
+			            int peso = par.second;
+			            matA[u][v] = peso;
+			        }
+			}
+			
+			// Imprimir matriz
+			for (auto& fila : matA) {
+			    for (int x : fila) cout << x << " ";
+			    cout << "\n";
+			}
+
+            // ------------------ Matriz de incidencia ----------------
+            cout << "\nMATRIZ DE INCIDENCIA\n";
+
+            int edgeCount = a;
+            vector<vector<int>> matI(n, vector<int>(edgeCount, 0));
+
+            vector<vector<bool>> usado(n, vector<bool>(n, false));
+            int id = 0;
+
+            for (int u = 0; u < n; u++) {
+                for (int v : grafoNP[u]) {
+
+                    if (!dirigido) {
+                        if (usado[u][v] || usado[v][u]) continue;
+                        usado[u][v] = usado[v][u] = true;
+                    }
+
+                    if (id >= edgeCount) break;
+
+                    matI[u][id] = -1;
+                    matI[v][id] = 1;
+                    id++;
+                }
+            }
+
+            for (auto& fila : matI) {
+                for (int x : fila) cout << x << " ";
+                cout << "\n";
+            }
+
+            // ------------------ Componentes conexas ------------------
+            cout << "\nCOMPONENTES CONEXAS (BFS)\n";
+            {
+                vector<bool> visited(n, false);
+                for (int i = 0; i < n; i++)
+                    if (!visited[i])
+                        bfs_component(i, visited, grafoNP);
+            }
+
+            // ------------------ Si es árbol -------------------------
+            cout << "\n¿ES ARBOL?\n";
+            cout << (esArbol(grafoNP, n, a) ? "SI\n" : "NO\n");
+
+            // ------------------ Bipartito ---------------------------
+            cout << "\n¿ES BIPARTITO?\n";
+            cout << (esBipartito(grafoNP, n) ? "SI\n" : "NO\n");
+
+            // ------------------ Fuertemente conexo ------------------
+            if (dirigido) {
+                cout << "\n¿ES FUERTEMENTE CONEXO?\n";
+                cout << (fuertementeConexo(grafoNP, n) ? "SI\n" : "NO\n");
+            }
+
+            system("pause");
+            break;
+        }
+
+        } // switch
 
     } while (op != 0);
 
     return 0;
 }
+
+
+
+
+
+
 
 
