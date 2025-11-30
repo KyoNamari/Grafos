@@ -90,7 +90,7 @@ bool esBipartito(vector<vector<int>>& g, int n) {
 }
 
 // =======================================================
-//       FUERTEMENTE CONEXO (VERSIÓN SIMPLE)
+//       FUERTEMENTE CONEXO 
 // =======================================================
 
 bool fuertementeConexo(vector<vector<int>>& g, int n) {
@@ -113,7 +113,7 @@ bool fuertementeConexo(vector<vector<int>>& g, int n) {
 }
 
 // =======================================================
-//       VERIFICAR SI ES ÁRBOL (versión optimizada)
+//       VERIFICAR SI ES ÁRBOL
 // =======================================================
 
 bool esArbol(vector<vector<int>>& g, int n, int aristas) {
@@ -128,6 +128,91 @@ bool esArbol(vector<vector<int>>& g, int n, int aristas) {
 
     return true;
 }
+
+// =======================================================
+//       Algoritmo Dijkstra "Clase"
+// =======================================================
+
+class Dijkstra {
+public:
+    int n;
+    vector<vector<pair<int,int>>> &g; // Grafo ponderado
+
+    Dijkstra(int n, vector<vector<pair<int,int>>> &g) : n(n), g(g) {}
+
+    vector<int> ejecutar(int origen) {
+        const int INF = 1e9;
+        vector<int> dist(n, INF);
+        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+        dist[origen] = 0;
+        pq.push({0, origen});
+
+        while (!pq.empty()) {
+            auto [d, u] = pq.top();
+            pq.pop();
+
+            if (d != dist[u]) continue;
+
+            for (auto &par : g[u]) {
+                int v = par.first;
+                int peso = par.second;
+
+                if (dist[u] + peso < dist[v]) {
+                    dist[v] = dist[u] + peso;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+        return dist;
+    }
+};
+
+// =======================================================
+//       Algoritmo Floyd Warshall "Clase"
+// =======================================================
+
+class FloydWarshall {
+public:
+    int n;
+    vector<vector<int>> dist;
+
+    FloydWarshall(int n, vector<vector<pair<int,int>>> &g) : n(n) {
+        const int INF = 1e9;
+        dist.assign(n, vector<int>(n, INF));
+
+        // Inicializamos la matriz
+        for (int i = 0; i < n; i++)
+            dist[i][i] = 0;
+
+        for (int u = 0; u < n; u++)
+            for (auto &par : g[u]) {
+                int v = par.first;
+                int peso = par.second;
+                dist[u][v] = min(dist[u][v], peso);
+            }
+
+        // Ejecutar algoritmo
+        for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+    }
+
+    void imprimir() {
+        const int INF = 1e9;
+        cout << "\nMATRIZ DE CAMINOS MINIMOS (Floyd-Warshall)\n";
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][j] == INF) cout << "INF ";
+                else cout << dist[i][j] << " ";
+            }
+            cout << "\n";
+        }
+    }
+};
+
+
 
 // =======================================================
 //                       MAIN
@@ -147,6 +232,7 @@ int main() {
         cout << "____________________________\n";
         cout << "1. Almacenar Grafo\n";
         cout << "2. Caracteristicas\n";
+        cout << "3. Camino mas corto\n";
         cout << "0. Salir\n";
         cin >> op;
 
@@ -316,6 +402,43 @@ int main() {
             system("pause");
             break;
         }
+        case 3: {
+		    if (!ponderado) {
+		        cout << "El grafo no es ponderado. Se requieren pesos para caminos mínimos.\n";
+		        system("pause");
+		        break;
+		    }
+		
+		    int algoritmo;
+		    system("cls");
+		    cout << "CAMINOS MAS CORTOS\n";
+		    cout << "1. Dijkstra (un solo origen)\n";
+		    cout << "2. Floyd-Warshall (todos contra todos)\n";
+		    cin >> algoritmo;
+		
+		    if (algoritmo == 1) {
+		        int origen;
+		        cout << "Nodo origen: ";
+		        cin >> origen;
+		
+		        Dijkstra dij(n, grafoP);
+		        vector<int> dist = dij.ejecutar(origen);
+		
+		        cout << "\nDISTANCIAS MINIMAS DESDE " << origen << "\n";
+		        for (int i = 0; i < n; i++) {
+		            if (dist[i] >= 1e9) cout << i << ": INF\n";
+		            else cout << i << ": " << dist[i] << "\n";
+		        }
+		    }
+		    else if (algoritmo == 2) {
+		        FloydWarshall fw(n, grafoP);
+		        fw.imprimir();
+		    }
+		
+		    system("pause");
+		    break;
+		}
+
 
         } // switch
 
