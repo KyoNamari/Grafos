@@ -412,6 +412,189 @@ public:
     }
 };
 
+// =======================================================
+//      Algoritmo Blossom - Edmons
+// ======================================================
+
+class Blossom {
+public:
+    int n;
+    vector<vector<int>> g;
+    vector<int> match, p, base;
+    vector<bool> used, blossom;
+    queue<int> q;
+
+    Blossom(vector<vector<int>>& graph) {
+        g = graph;
+        n = g.size();
+        match.assign(n, -1);
+        p.assign(n, -1);
+        base.resize(n);
+        used.assign(n, false);
+        blossom.assign(n, false);
+    }
+
+    int lca(int a, int b) {
+        vector<bool> visited(n, false);
+        while (true) {
+            a = base[a];
+            visited[a] = true;
+            if (match[a] == -1) break;
+            a = p[match[a]];
+        }
+        while (true) {
+            b = base[b];
+            if (visited[b]) return b;
+            b = p[match[b]];
+        }
+    }
+
+    void markPath(int v, int b, int children) {
+        while (base[v] != b) {
+            blossom[base[v]] = blossom[base[match[v]]] = true;
+            p[v] = children;
+            children = match[v];
+            v = p[match[v]];
+        }
+    }
+
+    int findPath(int root) {
+        fill(used.begin(), used.end(), false);
+        fill(p.begin(), p.end(), -1);
+        for (int i = 0; i < n; i++) base[i] = i;
+
+        while (!q.empty()) q.pop();
+        q.push(root);
+        used[root] = true;
+
+        while (!q.empty()) {
+            int v = q.front(); q.pop();
+
+            for (int u : g[v]) {
+                if (base[v] == base[u] || match[v] == u) continue;
+
+                if (u == root || (match[u] != -1 && p[match[u]] != -1)) {
+                    int cur = lca(v, u);
+
+                    fill(blossom.begin(), blossom.end(), false);
+                    markPath(v, cur, u);
+                    markPath(u, cur, v);
+
+                    for (int i = 0; i < n; i++)
+                        if (blossom[base[i]]) {
+                            base[i] = cur;
+                            if (!used[i]) {
+                                used[i] = true;
+                                q.push(i);
+                            }
+                        }
+                }
+                else if (p[u] == -1) {
+                    p[u] = v;
+                    if (match[u] == -1) {
+                        v = u;
+                        while (v != -1) {
+                            int pv = p[v], nv = match[pv];
+                            match[v] = pv;
+                            match[pv] = v;
+                            v = nv;
+                        }
+                        return 1;
+                    }
+                    u = match[u];
+                    used[u] = true;
+                    q.push(u);
+                }
+            }
+        }
+        return 0;
+    }
+
+    int maxMatching() {
+        int ans = 0;
+        for (int i = 0; i < n; i++)
+            if (match[i] == -1)
+                ans += findPath(i);
+        return ans;
+    }
+};
+
+
+
+// =======================================================
+//      Algoritmo Hopcroft Karp
+// ======================================================
+
+class HopcroftKarp {
+public:
+    int n, m; // tamaño de los conjuntos U y V
+    vector<vector<int>> adj; 
+    vector<int> pairU, pairV, dist;
+
+    HopcroftKarp(vector<vector<int>>& g, int nLeft)
+        : n(nLeft), m(g.size() - nLeft), adj(g) 
+    {
+        pairU.assign(n + 1, 0);
+        pairV.assign(m + 1, 0);
+        dist.assign(n + 1, 0);
+    }
+
+    bool bfs() {
+        queue<int> q;
+        for (int u = 1; u <= n; u++) {
+            if (pairU[u] == 0) {
+                dist[u] = 0;
+                q.push(u);
+            }
+            else dist[u] = INT_MAX;
+        }
+
+        int distInf = INT_MAX;
+        dist[0] = INT_MAX;
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+
+            if (dist[u] < dist[0]) {
+                for (int v : adj[u]) {
+                    if (dist[pairV[v]] == INT_MAX) {
+                        dist[pairV[v]] = dist[u] + 1;
+                        q.push(pairV[v]);
+                    }
+                }
+            }
+        }
+        return dist[0] != INT_MAX;
+    }
+
+    bool dfs(int u) {
+        if (u == 0) return true;
+
+        for (int v : adj[u]) {
+            if (dist[pairV[v]] == dist[u] + 1 && dfs(pairV[v])) {
+                pairV[v] = u;
+                pairU[u] = v;
+                return true;
+            }
+        }
+
+        dist[u] = INT_MAX;
+        return false;
+    }
+
+    int maxMatching() {
+        int matching = 0;
+
+        while (bfs()) {
+            for (int u = 1; u <= n; u++)
+                if (pairU[u] == 0 && dfs(u))
+                    matching++;
+        }
+
+        return matching;
+    }
+};
+
 
 // =======================================================
 //                       MAIN
@@ -699,6 +882,7 @@ int main() {
 		
 		    break;
 		}
+		
 		case 5: {
 		    if (grafoNP.empty()) {
 		        cout << "Primero ingresa un grafo.\n";
@@ -732,6 +916,41 @@ int main() {
 		    break;
 		}
 
+		case 6: {
+		    if (grafoNP.empty()) {
+		        cout << "Primero ingresa un grafo.\n";
+		        break;
+		    }
+		
+		    cout << "\n===== MATCHING AVANZADO =====\n";
+		
+		    // Revisamos si es bipartito
+		    bool bip = esBipartito(grafoNP, grafoNP.size());
+		
+		    if (bip) {
+		        cout << "El grafo es bipartito → Hopcroft–Karp.\n";
+		
+		        // Definimos tamaño del conjunto izquierdo (simple: mitad)
+		        int mitad = grafoNP.size() / 2;
+		
+		        HopcroftKarp hk(grafoNP, mitad);
+		        int res = hk.maxMatching();
+		
+		        cout << "Matching máximo bipartito = " << res << "\n";
+		    }
+		    else {
+		        cout << "El grafo NO es bipartito → algoritmo Blossom.\n";
+		
+		        Blossom bl(grafoNP);
+		        int res = bl.maxMatching();
+		
+		        cout << "Matching máximo general = " << res << "\n";
+		    }
+		    
+		    system("pause");
+		
+		    break;
+		}
 
 
         } // switch
