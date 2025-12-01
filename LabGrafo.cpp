@@ -320,9 +320,97 @@ public:
     }
 };
 
+// =======================================================
+//      Matching Maximal
+// ======================================================
+
+class MatchingBipartito {
+public:
+    int n;
+    vector<vector<int>> &g;
+    vector<int> matchR;   // A qué nodo está emparejado cada nodo del lado derecho
+    vector<bool> seen;
+
+    MatchingBipartito(vector<vector<int>> &grafo)
+        : g(grafo), n(grafo.size()), matchR(n, -1) {}
+
+    bool dfs(int u) {
+        for (int v : g[u]) {
+            if (!seen[v]) {
+                seen[v] = true;
+
+                if (matchR[v] == -1 || dfs(matchR[v])) {
+                    matchR[v] = u;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    int maxMatching() {
+        int resultado = 0;
+
+        for (int u = 0; u < n; u++) {
+            seen.assign(n, false);
+            if (dfs(u)) resultado++;
+        }
+        return resultado;
+    }
+
+    void imprimir() {
+        cout << "\nParejas encontradas:\n";
+        for (int v = 0; v < n; v++) {
+            if (matchR[v] != -1)
+                cout << matchR[v] << " - " << v << "\n";
+        }
+    }
+};
 
 
+// =======================================================
+//      Matching Grafo General
+// ======================================================
 
+class MatchingGeneral {
+public:
+    int n;
+    vector<vector<int>> &g;
+    vector<int> match;
+
+    MatchingGeneral(vector<vector<int>> &grafo)
+        : g(grafo), n(grafo.size()), match(n, -1) {}
+
+    int maxMatching() {
+        int contador = 0;
+
+        for (int u = 0; u < n; u++) {
+            if (match[u] == -1) { 
+                for (int v : g[u]) {
+                    if (match[v] == -1) {
+                        match[u] = v;
+                        match[v] = u;
+                        contador++;
+                        break;
+                    }
+                }
+            }
+        }
+        return contador;
+    }
+
+    void imprimir() {
+        cout << "\nParejas encontradas:\n";
+        vector<bool> visto(n, false);
+
+        for (int u = 0; u < n; u++) {
+            if (match[u] != -1 && !visto[u]) {
+                cout << u << " - " << match[u] << "\n";
+                visto[u] = visto[match[u]] = true;
+            }
+        }
+    }
+};
 
 
 // =======================================================
@@ -345,6 +433,8 @@ int main() {
         cout << "2. Caracteristicas\n";
         cout << "3. Camino mas corto\n";
         cout << "4. Arbol de expansion\n";
+        cout << "5. Matching\n";
+        cout << "6. Matching avanzado\n";
         cout << "0. Salir\n";
         cin >> op;
 
@@ -609,6 +699,39 @@ int main() {
 		
 		    break;
 		}
+		case 5: {
+		    if (grafoNP.empty()) {
+		        cout << "Primero ingresa un grafo.\n";
+		        system("pause");
+		        break;
+		    }
+		
+		    cout << "\n--- MATCHING ---\n";
+		
+		    // Revisamos si es bipartito
+		    bool bip = esBipartito(grafoNP, grafoNP.size());
+		
+		    if (bip) {
+		        cout << "El grafo es bipartito ... usando Matching Bipartito.\n";
+		
+		        MatchingBipartito mb(grafoNP);
+		        int res = mb.maxMatching();
+		        cout << "Matching encontrado: " << res << "\n";
+		        mb.imprimir();
+		    }
+		    else {
+		        cout << "El grafo NO es bipartito ... usando Matching General.\n";
+		
+		        MatchingGeneral mg(grafoNP);
+		        int res = mg.maxMatching();
+		        cout << "Matching encontrado: " << res << "\n";
+		        mg.imprimir();
+		    }
+		    system("pause");
+		
+		    break;
+		}
+
 
 
         } // switch
