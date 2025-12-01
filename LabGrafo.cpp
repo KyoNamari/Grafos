@@ -3,6 +3,9 @@
 #include <queue>
 #include <stack>
 #include <windows.h>
+#include <algorithm>
+#include <tuple>
+
 
 using namespace std;
 
@@ -136,13 +139,16 @@ bool esArbol(vector<vector<int>>& g, int n, int aristas) {
 class Dijkstra {
 public:
     int n;
-    vector<vector<pair<int,int>>> &g; // Grafo ponderado
+    vector<vector<pair<int,int>>> &g;
+    vector<int> dist;
+    vector<int> parent;
 
-    Dijkstra(int n, vector<vector<pair<int,int>>> &g) : n(n), g(g) {}
+    Dijkstra(int n, vector<vector<pair<int,int>>> &g) : n(n), g(g) {
+        dist.assign(n, 1e9);
+        parent.assign(n, -1);
+    }
 
-    vector<int> ejecutar(int origen) {
-        const int INF = 1e9;
-        vector<int> dist(n, INF);
+    void ejecutar(int origen) {
         priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
         dist[origen] = 0;
@@ -160,13 +166,30 @@ public:
 
                 if (dist[u] + peso < dist[v]) {
                     dist[v] = dist[u] + peso;
+                    parent[v] = u;
                     pq.push({dist[v], v});
                 }
             }
         }
-        return dist;
+    }
+
+    // ===============================
+    //    RECONSTRUIR CAMINO
+    // ===============================
+    vector<int> reconstruirCamino(int destino) {
+        vector<int> camino;
+
+        if (dist[destino] == 1e9) 
+            return camino; // vacio, no hay camino
+
+        for (int v = destino; v != -1; v = parent[v])
+            camino.push_back(v);
+
+        reverse(camino.begin(), camino.end());
+        return camino;
     }
 };
+
 
 // =======================================================
 //       Algoritmo Floyd Warshall "Clase"
@@ -212,6 +235,94 @@ public:
     }
 };
 
+// =======================================================
+//      DSU "Reconstruccion del arbol"
+// ======================================================
+
+
+class DSU {
+public:
+    vector<int> parent, rankv;
+
+    DSU(int n) {
+        parent.resize(n);
+        rankv.assign(n, 0);
+        for (int i = 0; i < n; i++) parent[i] = i;
+    }
+
+    int find(int x) {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);
+        return parent[x];
+    }
+
+    bool unite(int a, int b) {
+        a = find(a); 
+        b = find(b);
+        if (a == b) return false;
+
+        if (rankv[a] < rankv[b]) swap(a, b);
+        parent[b] = a;
+        if (rankv[a] == rankv[b]) rankv[a]++;
+        return true;
+    }
+};
+
+// =======================================================
+//      Algoritmo Kruskal
+// ======================================================
+
+class Kruskal {
+public:
+    int n;
+    vector<tuple<int,int,int>> edges;
+
+    Kruskal(int n) : n(n) {}
+
+    void agregarArista(int u, int v, int w) {
+        edges.emplace_back(w, u - 1, v - 1); // FIX: ajustar índice
+    }
+
+    pair<int, vector<tuple<int,int,int>>> mst_min() {
+        DSU dsu(n);
+        vector<tuple<int,int,int>> res;
+
+        vector<tuple<int,int,int>> ord = edges;
+        sort(ord.begin(), ord.end());
+
+        int costo = 0;
+        for (auto &[w, u, v] : ord) {
+            if (dsu.unite(u, v)) {
+                res.emplace_back(w, u, v);
+                costo += w;
+            }
+        }
+
+        return {costo, res};
+    }
+
+    pair<int, vector<tuple<int,int,int>>> mst_max() {
+        DSU dsu(n);
+        vector<tuple<int,int,int>> res;
+
+        vector<tuple<int,int,int>> ord = edges;
+        sort(ord.rbegin(), ord.rend());
+
+        int costo = 0;
+        for (auto &[w, u, v] : ord) {
+            if (dsu.unite(u, v)) {
+                res.emplace_back(w, u, v);
+                costo += w;
+            }
+        }
+
+        return {costo, res};
+    }
+};
+
+
+
+
 
 
 // =======================================================
@@ -233,6 +344,7 @@ int main() {
         cout << "1. Almacenar Grafo\n";
         cout << "2. Caracteristicas\n";
         cout << "3. Camino mas corto\n";
+        cout << "4. Arbol de expansion\n";
         cout << "0. Salir\n";
         cin >> op;
 
@@ -412,30 +524,89 @@ int main() {
 		    int algoritmo;
 		    system("cls");
 		    cout << "CAMINOS MAS CORTOS\n";
-		    cout << "1. Dijkstra (un solo origen)\n";
+		    cout << "1. Dijkstra (un solo origen, con reconstrucción)\n";
 		    cout << "2. Floyd-Warshall (todos contra todos)\n";
 		    cin >> algoritmo;
 		
+		    // =============================
+		    //            DIJKSTRA
+		    // =============================
 		    if (algoritmo == 1) {
-		        int origen;
+		        int origen, destino;
 		        cout << "Nodo origen: ";
 		        cin >> origen;
 		
 		        Dijkstra dij(n, grafoP);
-		        vector<int> dist = dij.ejecutar(origen);
+		        dij.ejecutar(origen);
 		
-		        cout << "\nDISTANCIAS MINIMAS DESDE " << origen << "\n";
-		        for (int i = 0; i < n; i++) {
-		            if (dist[i] >= 1e9) cout << i << ": INF\n";
-		            else cout << i << ": " << dist[i] << "\n";
+		        cout << "Nodo destino: ";
+		        cin >> destino;
+		
+		        cout << "\nDistancia mínima de " << origen << " a " << destino << ": ";
+		
+		        if (dij.dist[destino] == 1e9) {
+		            cout << "No existe camino.\n";
+		        } else {
+		            cout << dij.dist[destino] << "\n\n";
+		
+		            vector<int> camino = dij.reconstruirCamino(destino);
+		
+		            cout << "Camino: ";
+		            for (int v : camino) cout << v << " ";
+		            cout << "\n";
 		        }
 		    }
+		
+		    // =============================
+		    //      FLOYD-WARSHALL
+		    // =============================
 		    else if (algoritmo == 2) {
 		        FloydWarshall fw(n, grafoP);
 		        fw.imprimir();
 		    }
 		
 		    system("pause");
+		    break;
+		}
+		case 4: {
+		    if (grafoP.empty()) {
+		        cout << "Primero cargue un grafo ponderado.\n";
+		        break;
+		    }
+		
+		    Kruskal k(n);
+		
+		    // Convertir grafo ponderado (lista de adyacencia) en lista de aristas
+		    for (int u = 0; u < n; u++) {
+		        for (auto &par : grafoP[u]) {
+		            int v = par.first;
+		            int w = par.second;
+		            if (u < v) { 
+		                k.agregarArista(u + 1, v + 1, w); // enviar en 1-based
+		            }
+		        }
+		    }
+		
+		    cout << "\n--- ARBOL DE EXPANSION MINIMO (KRUSKAL) ---\n";
+		    auto [costoMin, arbolMin] = k.mst_min();
+		
+		    cout << "Costo total = " << costoMin << "\n";
+		    cout << "Aristas del árbol:\n";
+		    for (auto &[w, u, v] : arbolMin) {
+		        cout << "(" << u + 1 << ", " << v + 1 << ") peso = " << w << "\n";
+		    }
+		    system("pause");
+		
+		    cout << "\n--- ARBOL DE EXPANSION MAXIMO (KRUSKAL) ---\n";
+		    auto [costoMax, arbolMax] = k.mst_max();
+		
+		    cout << "Costo total = " << costoMax << "\n";
+		    cout << "Aristas del árbol:\n";
+		    for (auto &[w, u, v] : arbolMax) {
+		        cout << "(" << u + 1 << ", " << v + 1 << ") peso = " << w << "\n";
+		    }
+		    system("pause");
+		
 		    break;
 		}
 
