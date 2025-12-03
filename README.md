@@ -10,9 +10,6 @@ Con la finalidad de aplicar los conocimientos obtenidos mediante la  impartició
 - Tiempo de ejecución
 - Espacio
 - Lógica
-- Características
-- Defectos
-- Ventajas
 - Implementación
 ---
 # Objetivos
@@ -85,7 +82,7 @@ void insertarP(int o, int d, int p, vector<vector<pair<int,int>>>& g, bool dirig
 }
 ```
 
-Donde insertarNP seria para el apartado de grafosno No Ponderados (NP), con su contraparte de insertarP que acepta grafos ponderados. De igual forma se explica mejor el codigo en el apartado del **"Manual"** que esta subido aqui mismo.
+Donde insertarNP seria para el apartado de grafosno No Ponderados (NP), con su contraparte de insertarP que acepta grafos ponderados. De igual forma se explica mejor el codigo en el apartado de la **"Documentación"** que esta subido aqui mismo.
 
 ---
 
@@ -150,7 +147,7 @@ Explora una rama hasta el límite antes de retroceder y probar otra. Funciona co
 
 - `Tiempo: O(V + E)`
 
-- `Espacio: O(V) (pila de recursión)`
+- `Espacio: O(V)`
 
 ### Determinación de Bipartito
 
@@ -184,7 +181,7 @@ Encuentra el camino mas corto de un nodo inicial a todos los demas. Lo hace sele
 
 **Complejidad**
 
-- `Tiempo: O((V + E) log V)`
+- `Tiempo: O(E log V)`
 
 - `Espacio: O(V)`
 
@@ -194,9 +191,9 @@ Es un algoritmo de análisis de grafos que encuentra el camino más corto entre 
 
 **Complejidad**
 
-- `Tiempo: O(V³)`
+- `Tiempo: O(n³)`
 
-- `Espacio: O(V²)`
+- `Espacio: O(n²)`
 
 ## Arbol de expansión (Minima - Maxima)
 
@@ -229,7 +226,7 @@ El algoritmo de Edmonds Blossom es una forma inteligente de encontrar las mayore
 Al basarse en el algoritmo Blossom , el algoritmo Blossom de Edmonds también puede trabajar con grafos más complicados, lo que lo hace más versátil y eficiente a la hora de encontrar el máximo de coincidencias con menos pasos.
 
  **Complejidad** 
-  - `Tiempo: O(V² · E)` 
+  - `Tiempo: O(V³)` 
   - `Espacio: O(V + E)` 
 ---
 

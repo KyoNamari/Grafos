@@ -52,7 +52,6 @@ void insertarP(int o, int d, int p, vector<vector<pair<int,int>>>& g, bool dirig
 // =======================================================
 
 void bfs_component(int start, vector<bool>& visited, vector<vector<int>>& g) {
-    if (!inRange(start, (int)g.size())) return;
     queue<int> q;
     visited[start] = true;
     q.push(start);
@@ -64,7 +63,6 @@ void bfs_component(int start, vector<bool>& visited, vector<vector<int>>& g) {
         cout << u << " ";
 
         for (int v : g[u]) {
-            if (!inRange(v, (int)g.size())) continue;
             if (!visited[v]) {
                 visited[v] = true;
                 q.push(v);
@@ -78,20 +76,34 @@ void bfs_component(int start, vector<bool>& visited, vector<vector<int>>& g) {
 //       DFS (para componentes y conectividad)
 // =======================================================
 
-void dfs_rec(int u, vector<bool>& visited, vector<vector<int>>& g) {
-    if (!inRange(u, (int)g.size())) return;
-    visited[u] = true;
-    for (int v : g[u])
-        if (inRange(v, (int)g.size()) && !visited[v])
-            dfs_rec(v, visited, g);
+void dfs(int inicio, vector<bool>& visited, vector<vector<int>>& g) {
+    int n = g.size();
+    stack<int> st;
+    st.push(inicio);
+
+    while (!st.empty()) {
+        int u = st.top();
+        st.pop();
+
+        if (!visited[u]) {
+            visited[u] = true;
+
+            // Empujar los vecinos
+            for (int v : g[u]) {
+                if (!visited[v]) {
+                    st.push(v);
+                }
+            }
+        }
+    }
 }
+
 
 // =======================================================
 //       VERIFICAR SI ES BIPARTITO
 // =======================================================
 
 bool esBipartito(vector<vector<int>>& g, int n) {
-    if (n == 0) return true;
     vector<int> color(n, -1);
 
     for (int i = 0; i < n; i++) {
@@ -105,7 +117,6 @@ bool esBipartito(vector<vector<int>>& g, int n) {
             int u = q.front(); q.pop();
 
             for (int v : g[u]) {
-                if (!inRange(v, n)) continue;
                 if (color[v] == -1) {
                     color[v] = 1 - color[u];
                     q.push(v);
@@ -127,19 +138,17 @@ bool fuertementeConexo(vector<vector<int>>& g, int n) {
     if (n == 0) return true;
     vector<bool> visited(n, false);
 
-    // proteger llamada si 0 no existe
-    if (!inRange(0, n)) return false;
-    dfs_rec(0, visited, g);
+    dfs(0, visited, g);
     for (bool x : visited) if (!x) return false;
 
     vector<vector<int>> trans(n);
     for (int u = 0; u < n; u++)
         for (int v : g[u])
-            if (inRange(v,n)) trans[v].push_back(u);
+        	trans[v].push_back(u);
 
     fill(visited.begin(), visited.end(), false);
 
-    dfs_rec(0, visited, trans);
+    dfs(0, visited, trans);
     for (bool x : visited) if (!x) return false;
 
     return true;
@@ -150,7 +159,6 @@ bool fuertementeConexo(vector<vector<int>>& g, int n) {
 // =======================================================
 
 bool esArbol(vector<vector<int>>& g, int n, int aristas) {
-    if (n == 0) return false;
     vector<bool> visited(n, false);
 
     bfs_component(0, visited, g);
@@ -180,7 +188,6 @@ public:
     }
 
     void ejecutar(int origen) {
-        if (!inRange(origen, n)) return;
         priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
         dist.assign(n, 1e9);
@@ -198,7 +205,6 @@ public:
             for (auto &par : g[u]) {
                 int v = par.first;
                 int peso = par.second;
-                if (!inRange(v, n)) continue;
 
                 if (dist[u] + peso < dist[v]) {
                     dist[v] = dist[u] + peso;
@@ -214,7 +220,6 @@ public:
     // ===============================
     vector<int> reconstruirCamino(int destino) {
         vector<int> camino;
-        if (!inRange(destino, n)) return camino;
 
         if (dist[destino] == (int)1e9)
             return camino; // vacio, no hay camino
@@ -249,7 +254,6 @@ public:
             for (auto &par : g[u]) {
                 int v = par.first;
                 int peso = par.second;
-                if (!inRange(v, n)) continue;
                 dist[u][v] = min(dist[u][v], peso);
             }
 
@@ -289,7 +293,6 @@ public:
     }
 
     int find(int x) {
-        if (!inRange(x, (int)parent.size())) return -1;
         if (parent[x] != x)
             parent[x] = find(parent[x]);
         return parent[x];
@@ -380,7 +383,6 @@ public:
 
     bool dfs(int u) {
         for (int v : g[u]) {
-            if (!inRange(v, n)) continue;
             if (!seen[v]) {
                 seen[v] = true;
 
@@ -432,7 +434,6 @@ public:
         for (int u = 0; u < n; u++) {
             if (match[u] == -1) { 
                 for (int v : g[u]) {
-                    if (!inRange(v, n)) continue;
                     if (match[v] == -1) {
                         match[u] = v;
                         match[v] = u;
@@ -517,7 +518,6 @@ public:
             int v = q.front(); q.pop();
 
             for (int u : g[v]) {
-                if (!inRange(u,n)) continue;
                 if (base[v] == base[u] || match[v] == u) continue;
 
                 if (u == root || (match[u] != -1 && p[match[u]] != -1)) {
