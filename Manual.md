@@ -17,7 +17,7 @@
 
 ### **Autor: Jesús Alejandro Luevano Macias**  
 
-### **Profesor: Miguel Ángel Meza de Luna**  
+### **Profesor: Dr. Miguel Angel Meza de Luna**  
 
 ### **Materia: Estructuras computacionales avanzadas**  
 
@@ -1497,7 +1497,7 @@ La integración de estas funciones dentro de una misma interfaz hace que el prog
 
 El desarrollo de este programa permitió integrar en una sola herramienta múltiples algoritmos fundamentales del estudio de grafos, ofreciendo una plataforma práctica, educativa y funcional para analizar estructuras complejas. A lo largo del proyecto se implementaron métodos clásicos como DFS, BFS, Dijkstra, Floyd–Warshall y Kruskal, además de algoritmos avanzados como Hopcroft–Karp y Matching General, logrando así una cobertura amplia de temas esenciales en teoría de grafos y optimización combinatoria.
 
-Durante el proceso se comprobó que una adecuada representación del grafo —ya sea mediante lista de adyacencia, matriz de adyacencia o matriz de incidencia— influye directamente en el rendimiento de los algoritmos, resaltando la importancia de seleccionar la estructura ideal dependiendo del tipo y tamaño del grafo tratado.
+Durante el proceso se comprobó que una adecuada representación del grafo, ya sea mediante lista de adyacencia, matriz de adyacencia o matriz de incidencia, influye directamente en el rendimiento de los algoritmos, resaltando la importancia de seleccionar la estructura ideal dependiendo del tipo y tamaño del grafo tratado.
 
 Asimismo, la inclusión del menú interactivo facilitó la navegación del usuario, permitiendo evaluar propiedades como bipartición, conectividad, existencia de árboles de expansión y obtención de caminos mínimos. Esto convierte al programa no solo en una herramienta técnica, sino también en un espacio didáctico para comprender el funcionamiento interno de cada algoritmo mediante ejemplos y resultados visibles.
 

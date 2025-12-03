@@ -50,6 +50,8 @@ Con la finalidad de aplicar los conocimientos obtenidos mediante la  impartició
 
     - Mostrar e interpretar resultados obtenidos.
 ---
+# Explicación de cada algoritmo
+
 ## Representaciones de un Grafo
 
 ### 1. Lista de Adyacencia
@@ -230,6 +232,121 @@ Al basarse en el algoritmo Blossom , el algoritmo Blossom de Edmonds también pu
   - `Espacio: O(V + E)` 
 ---
 
-Con este ultimo algoritmo terminamos de explicar todos los metodos que utilizamos para el desarrollo de este programa.  Sin mas que agregar lo invito a leer los demas documentos que se encuentran en este apartado y de ante mano le invito probar el programa. 
+# Guía de Ejecución
+
+A continuación se describe paso a paso cómo ejecutar el programa, compilarlo y utilizar todas sus funcionalidades.
+
+**1. Requisitos previos**
+
+Antes de ejecutar el programa, asegúrate de tener:
+
+Compilador C++ compatible con C++17 o superior. Ejemplos:
+
+- GCC / MinGW
+
+- Clang
+
+- MSVC
+
+- Terminal o consola
+
+- (Opcional) VS Code con la extensión oficial de C++
+
+**2. Uso del programa**
+
+Al iniciar, se mostrará el menú principal, desde donde podrás acceder a todas las opciones del sistema.
+
+```cpp
+===== MENÚ PRINCIPAL =====
+0 - Salir
+1 - Almacenar grafo
+2 - Ver características del grafo
+3 - Caminos cortos
+4 - Árbol de expansión (Min/Max)
+5 - Matching general
+6 - Matching avanzado
+```
+
+**3. Opciones del menu**
+
+1. Almacenar el grafo
+
+    Permite ingresar un grafo mediante:
+
+- número de nodos
+
+- número de aristas
+
+- tipo de grafo (dirigido, no dirigido, ponderado)
+
+    El programa valida rangos y construye:
+
+- lista de adyacencia
+
+- matriz de adyacencia
+
+- matriz de incidencia
+
+2. Características del grafo
+
+    En este apartado podrás obtener:
+
+- Si el grafo es bipartito
+
+- Si es árbol
+
+- Si es fuertemente conexo
+
+- Número de componentes conexas
+
+- Representaciones:
+
+    - lista de adyacencia
+
+    - matriz de adyacencia
+
+    - matriz de incidencia
+
+3. Caminos cortos
+
+    Contiene dos algoritmos:
+
+- Dijkstra
+
+    - Calcula la ruta más corta desde un origen a un destino.
+
+    - Permite reconstruir el camino mínimo.
+
+- Floyd–Warshall
+
+    - Muestra la tabla completa de distancias mínimas entre todos los pares.
+
+    - Útil para verificar resultados con Dijkstra.
+
+4. Árbol de Expansión (Min-Max)
+
+    Usa Kruskal en dos variantes:
+
+- Árbol de expansión mínimo
+
+- Árbol de expansión máximo (Reverse Kruskal)
+
+- Muestra las aristas seleccionadas y el costo total.
+
+5. Matching General
+
+    Encuentra emparejamientos en grafos generales mediante un enfoque greedy.
+
+6. Matching Avanzado
+
+    Implementa algoritmos optimizados como:
+
+- Hopcroft–Karp (Grafos Bipartitos)
+
+- Algoritmo Blossom (Grafos Generales)
+
+    Permite encontrar el matching máximo.
+
+Para salir del programa solo es seleccionar la opción 0. Automáticamente el programa se cerrará.
 
 *`Jesús Alejandro Luevano Macias`*
