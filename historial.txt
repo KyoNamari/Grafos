@@ -1,0 +1,11 @@
+* a98e2bb (HEAD -> main, origin/main) 11* Actualización del proyecto (Correcciones 1.0)
+* 6fc3618 10* Actualización del proyecto (Documentacion)
+* e6cc069 9* Actualización del proyecto (Explicacion de los Algoritmos)
+* aa29400 8* Actualización del proyecto (Pruebas y Testeos)
+* 0cf9a8d 7* Actualización del proyecto (Algoritmos Matching Avanzado)
+* 230ba77 6* Actualización del proyecto (Algoritmos Matching Simples)
+* 3565e98 5* Actualización del proyecto (Algoritmos de Arbol de expansion)
+* ebd8324 3* Actualización del proyecto (Algoritmos de caminos)
+* cf5ef84 3* Actualización del proyecto (Caracteristicas de los grafos y sus representaciones)
+* 18fabe6 2* Actualización del proyecto (Agreagr almacenamiento de Grafos)
+* fb884ac Primer commit - Proyecto de grafos
